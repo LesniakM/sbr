@@ -1,0 +1,10 @@
+# Copyright (c) 2025 MLesniak https://github.com/LesniakM
+
+config BOARD_NICENANO_V20
+	select SOC_NRF52840_QIAA
+    select ARCH_ARM
+
+config BOARD_ENABLE_DCDC
+    bool "Enable DCDC mode"
+    select SOC_DCDC_NRF52X
+    default y

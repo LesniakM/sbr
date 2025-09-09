@@ -1,0 +1,9 @@
+# Copyright (c) 2025 MLesniak https://github.com/LesniakM
+
+if BOARD_NICENANO_V20
+
+config BT_CTLR
+    bool
+    default BT
+
+endif # BOARD_NICENANO_V20
