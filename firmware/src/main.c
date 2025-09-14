@@ -7,37 +7,10 @@
 // #include "mpu6050.h"
 
 #include "balance_module.h"
-
-LOG_MODULE_REGISTER(SBR_main, LOG_LEVEL_DBG);
-
-// USB
+#include "ble_comm.h"
 #include "usb_module.h"
 
-// BLE
-#include "ble_comm.h"
-
-static const struct bt_le_adv_param *adv_param =
-    BT_LE_ADV_PARAM((BT_LE_ADV_OPT_CONNECTABLE |
-                     BT_LE_ADV_OPT_USE_IDENTITY), /* Connectable advertising and
-                                                     use identity address */
-                    800, /* Min Advertising Interval 500ms (800*0.625ms) */
-                    801, /* Max Advertising Interval 500.625ms (801*0.625ms) */
-                    NULL); /* Set to NULL for undirected advertising */
-
-#define DEVICE_NAME CONFIG_BT_DEVICE_NAME
-#define DEVICE_NAME_LEN (sizeof(DEVICE_NAME) - 1)
-
-static const struct bt_data ad[] = {
-    BT_DATA_BYTES(BT_DATA_FLAGS, (BT_LE_AD_GENERAL | BT_LE_AD_NO_BREDR)),
-    BT_DATA(BT_DATA_NAME_COMPLETE, DEVICE_NAME, DEVICE_NAME_LEN),
-
-};
-
-static const struct bt_data sd[] = {
-    BT_DATA_BYTES(BT_DATA_UUID128_ALL, BT_UUID_SBR_SERVICE_VAL),
-};
-
-// BLE END
+LOG_MODULE_REGISTER(SBR_main, LOG_LEVEL_DBG);
 
 int time = 0;
 bool drive = false;
@@ -54,8 +27,10 @@ void err_lock(int error_code) {
 }
 
 int main(void) {
+  LOG_INF("Build time: " __DATE__ " " __TIME__);
+  LOG_INF("Build toolchain ver: " STRINGIFY(BUILD_VERSION));
+  LOG_INF("START");
   int err;
-  LOG_INF("\nSTART");
 
   err = configure_gpios();
   if (err) {
@@ -117,7 +92,9 @@ int main(void) {
 
   while (1) {
     LOG_INF("hey");
-    k_msleep(100);
-    gpio_pin_toggle_dt(&led);
+    gpio_pin_set_dt(&led, 1);
+    k_msleep(50);
+    gpio_pin_set_dt(&led, 0);
+    k_msleep(950);
   }
 }
