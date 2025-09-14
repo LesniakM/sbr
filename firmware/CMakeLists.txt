@@ -4,7 +4,7 @@ target_include_directories(app PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-project(sbr-firmware)
+project(firmware)
 
 target_sources(app PRIVATE src/main.c)
 target_sources(app PRIVATE src/periphals.c)

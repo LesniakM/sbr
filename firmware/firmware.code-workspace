@@ -1,0 +1,28 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"uart.h": "c",
+			"pwm.h": "c",
+			"printk.h": "c",
+			"bitset": "cpp",
+			"usb_module.h": "c",
+			"motors.h": "c",
+			"mpu6050.h": "c",
+			"buttons.h": "c",
+			"ble_comm.h": "c",
+			"i2c.h": "c",
+			"gpio.h": "c",
+			"usb_device.h": "c",
+			"periphals.h": "c",
+			"log.h": "c",
+			"device.h": "c",
+			"balance_module.h": "c",
+			"kernel.h": "c"
+		}
+	}
+}
