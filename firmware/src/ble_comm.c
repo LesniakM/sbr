@@ -18,6 +18,23 @@ BT_GATT_SERVICE_DEFINE(
     BT_GATT_CHARACTERISTIC(BT_UUID_SBR_CONTROL, BT_GATT_CHRC_WRITE,
                            BT_GATT_PERM_WRITE, NULL, update_control, NULL));
 
+const struct bt_le_adv_param *adv_param =
+    BT_LE_ADV_PARAM((BT_LE_ADV_OPT_CONN |
+                     BT_LE_ADV_OPT_USE_IDENTITY), /* Connectable advertising and
+                                                     use identity address */
+                    800, /* Min Advertising Interval 500ms (800*0.625ms) */
+                    801, /* Max Advertising Interval 500.625ms (801*0.625ms) */
+                    NULL); /* Set to NULL for undirected advertising */
+
+const struct bt_data ad[] = {
+    BT_DATA_BYTES(BT_DATA_FLAGS, (BT_LE_AD_GENERAL | BT_LE_AD_NO_BREDR)),
+    BT_DATA(BT_DATA_NAME_COMPLETE, DEVICE_NAME, DEVICE_NAME_LEN),
+};
+
+const struct bt_data sd[] = {
+    BT_DATA_BYTES(BT_DATA_UUID128_ALL, BT_UUID_SBR_SERVICE_VAL),
+};
+
 ssize_t read_accel(struct bt_conn *conn, const struct bt_gatt_attr *attr,
                    void *buf, uint16_t len, uint16_t offset) {
   // get a pointer to button_state which is passed in the
