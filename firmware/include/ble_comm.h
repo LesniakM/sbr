@@ -75,4 +75,6 @@ bool sbr_gyro_cb(void);
 
 extern struct sbr_callback sbr_callbacks;
 
+int start_ble(void);
+
 #endif

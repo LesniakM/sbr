@@ -1,12 +1,11 @@
 #include "periphals.h"
 
 #define LED0_NODE DT_ALIAS(led0) // LED0_NODE = led0 defined in the .dts file
-// define MPU6500_ADDRESS_NODE DT_ALIAS(mpu6500_address)
-// #define I2C0_MPU_NODE DT_NODELABEL(mpu6500)
+#define MPU6500_ADDRESS_NODE DT_ALIAS(mpu6500_address)
+#define I2C0_MPU_NODE DT_NODELABEL(mpu6500)
 const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
-// const struct gpio_dt_spec mpu6500_address_pin =
-// GPIO_DT_SPEC_GET(MPU6500_ADDRESS_NODE, gpios); const struct i2c_dt_spec
-// dev_i2c = I2C_DT_SPEC_GET(I2C0_MPU_NODE);
+const struct gpio_dt_spec mpu6500_address_pin = GPIO_DT_SPEC_GET(MPU6500_ADDRESS_NODE, gpios); 
+const struct i2c_dt_spec dev_i2c = I2C_DT_SPEC_GET(I2C0_MPU_NODE);
 
 LOG_MODULE_REGISTER(SBR_periphals, LOG_LEVEL_DBG);
 
@@ -29,7 +28,7 @@ int configure_gpios() {
       LOG_ERR("Error %d: failed to configure m_driver_12_sleep pin %d\n", ret,
   m_driver_12_sleep.pin); return ret;
   }*/
-
+  LOG_DBG("GPIO configured.");
   return 0;
 }
 
@@ -70,12 +69,21 @@ uint32_t pins)
 */
 
 int config_buttons_callbacks() {
-  gpio_pin_configure_dt(&button1, GPIO_INPUT);
+  int ret = 0;
+  ret = gpio_pin_configure_dt(&button1, GPIO_INPUT);
   // gpio_pin_configure_dt(&button2, GPIO_INPUT);
+  if (ret != 0) {
+    LOG_ERR("Button GPIO config failed with error: %d", ret);
+    return ret;
+  }
 
   // Setup interrupts for pins:
-  gpio_pin_interrupt_configure_dt(&button1, GPIO_INT_EDGE_BOTH);
+  ret = gpio_pin_interrupt_configure_dt(&button1, GPIO_INT_EDGE_BOTH);
   // gpio_pin_interrupt_configure_dt(&button2, GPIO_INT_EDGE_TO_ACTIVE);
+  if (ret != 0) {
+    LOG_ERR("Button interrupt config failed with error: %d", ret);
+    return ret;
+  }
 
   // Initialize the static struct gpio_callback variable
   gpio_init_callback(&button1_cb_data, button1_cb, BIT(button1.pin));
@@ -86,5 +94,6 @@ int config_buttons_callbacks() {
   // gpio_add_callback(button2.port, &button2_cb_data);
   k_msleep(10);
 
-  return 0;
+  LOG_DBG("Button callback registered.");
+  return ret;
 }

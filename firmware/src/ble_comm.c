@@ -156,3 +156,34 @@ struct sbr_callback sbr_callbacks = {
     .led_cb = sbr_contrl_cb,
     .button_cb = sbr_accel_cb,
 };
+
+int start_ble(void) {
+  int err = 0;
+  err = bt_enable(NULL);
+  if (err) {
+    LOG_ERR("Bluetooth init failed (err %d)", err);
+    return err;
+  }
+  LOG_DBG("Bluetooth initialized.");
+
+  err = bt_conn_cb_register(&connection_callbacks);
+  if (err) {
+    LOG_ERR("Failed to register connection callbacks (err %d)", err);
+    return err;
+  }
+  LOG_DBG("cb registered.");
+
+  err = ble_init(&sbr_callbacks);
+  if (err) {
+    LOG_ERR("Failed to init LBS (err:%d)", err);
+    return err;
+  }
+  LOG_DBG("ble_init ok.");
+
+  err = bt_le_adv_start(adv_param, ad, ARRAY_SIZE(ad), sd, ARRAY_SIZE(sd));
+  if (err) {
+    LOG_ERR("Advertising failed to start (err %d)", err);
+    return err;
+  }
+  return 0;
+}

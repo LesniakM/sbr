@@ -8,7 +8,7 @@ project(firmware)
 
 target_sources(app PRIVATE src/main.c)
 target_sources(app PRIVATE src/periphals.c)
-# target_sources(app PRIVATE src/mpu6050.c)
+target_sources(app PRIVATE src/mpu6050.c)
 # target_sources(app PRIVATE src/motors.c)
 target_sources(app PRIVATE src/usb_module.c)
 target_sources(app PRIVATE src/ble_comm.c)

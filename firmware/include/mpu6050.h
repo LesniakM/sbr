@@ -2,6 +2,7 @@
 #define MPU6050_H
 
 #include <stdint.h>
+#include <zephyr/logging/log.h>
 #include <zephyr/drivers/i2c.h>
 
 #define MPU6050_REG_ACCEL_XOUT_H 0x3B
@@ -56,7 +57,7 @@ enum DLPF_CFG
  * @note The default settings provide basic sensor functionality.
  *       Additional configuration may be required for specific applications.
  */
-void mpu6050_init(const struct i2c_dt_spec *dev_i2c);
+int init_mpu6050(const struct i2c_dt_spec *dev_i2c);
 
 /**
  * @brief Reads 12 bytes of sensor data from the MPU6050.

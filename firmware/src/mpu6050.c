@@ -1,18 +1,25 @@
 #include "mpu6050.h"
 #include <math.h>
 
-void mpu6050_init(const struct i2c_dt_spec *dev_i2c)
-{
+LOG_MODULE_REGISTER(SBR_MPU6050, LOG_LEVEL_DBG);
 
-    i2c_reg_write_byte_dt(dev_i2c, MPU6050_REG_PWR_MGMT_1, 0);
+int init_mpu6050(const struct i2c_dt_spec *dev_i2c)
+{   
+    int err = 0;
+    err += i2c_reg_write_byte_dt(dev_i2c, MPU6050_REG_PWR_MGMT_1, 0);
+    LOG_DBG("%d\n", err);
     k_msleep(2);
-    i2c_reg_write_byte_dt(dev_i2c, MPU6050_REG_ACCEL_CONFIG, 0x0);
+    err += i2c_reg_write_byte_dt(dev_i2c, MPU6050_REG_ACCEL_CONFIG, 0x0);
+    LOG_DBG("%d\n", err);
     k_msleep(2);
-    i2c_reg_write_byte_dt(dev_i2c, MPU6050_REG_GYRO_CONFIG, 0x0);
+    err += i2c_reg_write_byte_dt(dev_i2c, MPU6050_REG_GYRO_CONFIG, 0x0);
+    LOG_DBG("%d\n", err);
     k_msleep(2);
-    i2c_reg_write_byte_dt(dev_i2c, MPU6050_REG_CONFIG, BW_42HZ);
+    err += i2c_reg_write_byte_dt(dev_i2c, MPU6050_REG_CONFIG, BW_42HZ);
+    LOG_DBG("%d\n", err);
     k_msleep(2);
-    // printk("MPU6050 init end.\n");
+    LOG_DBG("MPU6050 init end with code: %d\n", err);
+    return err;
 }
 
 /*
