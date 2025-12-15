@@ -12,6 +12,48 @@
 
 LOG_MODULE_REGISTER(SBR_main, LOG_LEVEL_DBG);
 
+int64_t start = 0;
+int64_t elapsed_ms =0;
+
+#define SAMPLING_INTERVAL 5
+
+K_SEM_DEFINE(i2c_tick_sem, 0, 1);
+
+void timer_handler(struct k_timer *timer)
+{
+    k_sem_give(&i2c_tick_sem);   /* Signal only */
+}
+
+K_TIMER_DEFINE(i2c_timer, timer_handler, NULL);
+
+void measurement_thread(void)
+{
+  while (1) {
+    k_sem_take(&i2c_tick_sem, K_FOREVER);
+    start = k_uptime_get();
+    mpu6050_get_readings(&dev_i2c, readbuffer);
+
+    int16_t accel_x = (readbuffer[0] << 8) | readbuffer[1];
+    int16_t accel_z = (readbuffer[4] << 8) | readbuffer[5];
+    int16_t gyro_y = (readbuffer[10] << 8) | readbuffer[11];
+
+    float accel_x_mss = convert_accel(accel_x);
+    float accel_z_mss = convert_accel(accel_z);
+    float gyro_y_dps = convert_gyro(gyro_y);
+
+    a_angle = accel_angle(accel_z_mss, accel_x_mss);
+    g_angle = gyro_angle(gyro_y_dps, SAMPLING_INTERVAL);
+    elapsed_ms = k_uptime_get() - start;
+    current_angle = gyro_favor_factor * (current_angle + (g_angle * (1.00F / 100.0F))) + (1.00F - gyro_favor_factor) * a_angle;
+  }
+}
+
+K_THREAD_DEFINE(i2c_tid, 1024, measurement_thread,
+                NULL, NULL, NULL,
+                5, 0, 0);
+          
+K_TIMER_DEFINE(measure_timer, timer_handler, NULL);
+
 int time = 0;
 bool drive = false;
 uint8_t loop_time = 2;
@@ -57,40 +99,17 @@ int main(void) {
   }
 
   // pio_pin_set_dt(&m_driver_12_sleep, 1);
-  uint8_t buffer[12];
-  float current_angle = 0.0F;
-  const int32_t dt_ms = 10;
-  int index = 0;
+
+  k_timer_start(&measure_timer,
+                  K_MSEC(SAMPLING_INTERVAL),   /* initial delay */
+                  K_MSEC(SAMPLING_INTERVAL));  /* period */
+  
   while (1) {
-    index++;
-    mpu6050_get_readings(&dev_i2c, buffer);
-
-    int16_t accel_x = (buffer[0] << 8) | buffer[1];
-    //int16_t accel_y = (buffer[2] << 8) | buffer[3];
-    int16_t accel_z = (buffer[4] << 8) | buffer[5];
-    //int16_t gyro_x = (buffer[8] << 8) | buffer[9];
-    int16_t gyro_y = (buffer[10] << 8) | buffer[11];
-
-    // Convert to physical units
-    float accel_x_mss = convert_accel(accel_x);
-    //float accel_y_mss = convert_accel(accel_y);
-    float accel_z_mss = convert_accel(accel_z);
-    float gyro_y_dps = convert_gyro(gyro_y);
-
-    a_angle = accel_angle(accel_z_mss, accel_x_mss);;
-    g_angle = gyro_angle(gyro_y_dps, dt_ms);
-
-    current_angle = gyro_favor_factor * (current_angle + (g_angle * (1.00F / 100.0F))) + (1.00F - gyro_favor_factor) * a_angle;
-
-    if (index >= 5) {
-      index = 0;
-      LOG_INF("Current angle: %.2f degrees", (double)current_angle);
-      gpio_pin_set_dt(&led, 1);
-      k_msleep(dt_ms);
-    }
-    else {
-      gpio_pin_set_dt(&led, 0);
-      k_msleep(dt_ms);
-    }
+    LOG_INF("Current angle: %.2f A: %.2f G: %.2f Time: %d", (double)current_angle, (double)a_angle, (double)g_angle, (int)elapsed_ms);
+    gpio_pin_set_dt(&led, 1);
+    k_msleep(1);
+    //LOG_INF("Loop took %lld ms\n", elapsed_ms);
+    gpio_pin_set_dt(&led, 0);
+    k_msleep(19);
   }
 }

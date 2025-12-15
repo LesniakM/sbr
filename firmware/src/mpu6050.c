@@ -15,7 +15,7 @@ int init_mpu6050(const struct i2c_dt_spec *dev_i2c)
     err += i2c_reg_write_byte_dt(dev_i2c, MPU6050_REG_GYRO_CONFIG, 0x0);
     LOG_DBG("%d\n", err);
     k_msleep(2);
-    err += i2c_reg_write_byte_dt(dev_i2c, MPU6050_REG_CONFIG, BW_42HZ);
+    err += i2c_reg_write_byte_dt(dev_i2c, MPU6050_REG_CONFIG, BW_98HZ);
     LOG_DBG("%d\n", err);
     k_msleep(2);
     LOG_DBG("MPU6050 init end with code: %d\n", err);
@@ -60,7 +60,7 @@ float convert_gyro(int16_t raw_val)
     return (float)raw_val / 131.072F;
 }
 
-void mpu6050_get_readings(const struct i2c_dt_spec *dev_i2c, uint8_t *buffer)
+int mpu6050_get_readings(const struct i2c_dt_spec *dev_i2c, uint8_t *buffer)
 {
-    i2c_burst_read_dt(dev_i2c, (uint8_t)MPU6050_REG_ACCEL_XOUT_H, buffer, 12);
+    return i2c_burst_read_dt(dev_i2c, (uint8_t)MPU6050_REG_ACCEL_XOUT_H, buffer, 12);
 }

@@ -85,7 +85,7 @@ int init_mpu6050(const struct i2c_dt_spec *dev_i2c);
  * 11.gyro-Y HB
  * 12.gyro-Y LB
  */
-void mpu6050_get_readings(const struct i2c_dt_spec *dev_i2c, uint8_t *buffer);
+int mpu6050_get_readings(const struct i2c_dt_spec *dev_i2c, uint8_t *buffer);
 
 float accel_angle(float z_acc, float x_acc);
 float gyro_angle(float angle_speed, float time_ms);
